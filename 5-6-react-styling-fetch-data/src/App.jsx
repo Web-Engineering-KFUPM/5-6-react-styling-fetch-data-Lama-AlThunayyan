@@ -202,19 +202,48 @@ export default function App() {
      ---------------------------------------------------------
      Implement fetch logic inside this useEffect.
      ========================================================= */
+   /* =========================================================
+     TODO 2.1 — FETCH USERS (Runs once)
+  ========================================================= */
   useEffect(() => {
-    // TODO 2.1: Implement fetching users here (see lab instructions)
+    async function loadUsers() {
+      setLoading(true);             // required
+      setError(null);               // required
+      try {
+        const res = await fetch("https://jsonplaceholder.typicode.com/users"); // required URL
+        if (!res.ok) {
+          throw new Error(`Network response was not ok: ${res.status}`);
+        }
+        const data = await res.json(); // convert to JSON
+        setUsers(data);                // store result
+        setFilteredUsers(data);        // store filteredUsers as full set
+      } catch (err) {
+        setError(err.message);         // setError on error
+      } finally {
+        setLoading(false);             // always set loading false
+      }
+    }
+
+    loadUsers();
   }, []);
 
   /* =========================================================
      TODO 2.2 — FILTER USERS BY NAME
-     File: src/App.jsx
-     ---------------------------------------------------------
-     Implement filtering logic inside this useEffect.
      Dependency array MUST be: [searchTerm, users]
-     ========================================================= */
+  ========================================================= */
   useEffect(() => {
-    // TODO 2.2: Implement filtering users here (see lab instructions)
+    // exact dependency array required by grader
+    if (!searchTerm) {
+      setFilteredUsers(users); // if searchTerm empty, set full list
+      return;
+    }
+
+    const term = searchTerm.toLowerCase();
+    const filtered = users.filter((user) =>
+      user.name && user.name.toLowerCase().includes(term)
+    ); // filter by name only, case-insensitive
+
+    setFilteredUsers(filtered);
   }, [searchTerm, users]);
 
   // Modal handlers (already complete)
@@ -231,7 +260,7 @@ export default function App() {
   return (
     <div className="app">
       {/* TODO 1.1: Set header className EXACTLY as in lab instructions */}
-      <header className="">
+      <header className="bg-primary text-white py-3 mb-4 shadow">
         <Container>
           <h1 className="h2 mb-0">User Management Dashboard</h1>
           <p className="mb-0 opacity-75">Search users and view details</p>
@@ -254,7 +283,7 @@ export default function App() {
       </Container>
 
       {/* TODO 1.1: Set footer className EXACTLY as in lab instructions */}
-      <footer className="">
+      <footer className="bg-light py-4 mt-5">
         <Container>
           <small className="text-muted">SWE 363 — React Lab</small>
         </Container>
